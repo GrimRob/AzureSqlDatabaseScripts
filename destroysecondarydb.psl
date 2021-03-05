@@ -1,0 +1,22 @@
+Disable-AzContextAutosave –Scope Process
+
+$connection = Get-AutomationConnection -Name AzureRunAsConnection
+$connectionResult = Connect-AzAccount `
+                        -ServicePrincipal `
+                        -Tenant $connection.TenantID `
+                        -ApplicationId $connection.ApplicationID `
+                        -CertificateThumbprint $connection.CertificateThumbprint
+if(!$connectionResult) {
+     throw "Not Connected" 
+}
+
+Write-Output "Connected"
+
+#TODO - supply your primary and secondary details. 
+$databasename = "YourDb"
+$secondaryResourceGroupName = "YourSecondaryRG"
+$secondaryServerName = "YourSecondaryServer"
+
+Remove-AzureRmSqlDatabase -ResourceGroupName $secondaryResourceGroupName -ServerName $secondaryServerName -DatabaseName $databasename
+
+Write-Output "Sorted"

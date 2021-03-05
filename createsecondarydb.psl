@@ -1,0 +1,25 @@
+Disable-AzContextAutosave –Scope Process
+
+$connection = Get-AutomationConnection -Name AzureRunAsConnection
+$connectionResult = Connect-AzAccount `
+                        -ServicePrincipal `
+                        -Tenant $connection.TenantID `
+                        -ApplicationId $connection.ApplicationID `
+                        -CertificateThumbprint $connection.CertificateThumbprint
+if(!$connectionResult) {
+     throw "Not Connected" 
+}
+
+Write-Output "Connected"
+
+#TODO - supply your primary and secondary details. The secondary server must exist.
+$databasename = "YourDb"
+$primaryResourceGroupName = "YourPrimaryRG"
+$primaryServerName = "YourPrimaryServer"
+$secondaryResourceGroupName = "YourSecondaryRG"
+$secondaryServerName = "YourSecondaryServer"
+
+$database = Get-AzSqlDatabase -DatabaseName $databasename -ResourceGroupName $primaryResourceGroupName -ServerName $primaryServerName
+$database | New-AzSqlDatabaseSecondary -PartnerResourceGroupName $secondaryResourceGroupName -PartnerServerName $secondaryServerName -AllowConnections "All"
+
+Write-Output "Sorted"
